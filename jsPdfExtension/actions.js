@@ -1,9 +1,8 @@
 r = require('ramda')
 
-function text(doc, txtArray, options) {
+function text(doc, options) {
 	return normalizeInput({
 			doc,
-			txtArray,
 			options
 		})
 		.then(textFormat)
@@ -14,19 +13,18 @@ function text(doc, txtArray, options) {
 }
 
 
-
 function normalizeInput(input) {
 
-	input.txtArray = Array.isArray(input.txtArray) ? input.txtArray : [input.txtArray]
 	input.options = input.options || {}
+	if(input.options.txtArray) input.options.txtArray = Array.isArray(input.options.txtArray) ? input.options.txtArray : [input.options.txtArray]
 	input.options.x = input.options.x || 0
 	input.options.y = input.options.y || 0
 	input.options.lineSpacing = input.options.lineSpacing || 0.2
 
 	input.pageWidth = input.doc.internal.pageSize.width
 	input.fontSize = input.doc.internal.getFontSize()
-	input.textWidth = input.txtArray.map(txt => input.doc.getStringUnitWidth(txt) * input.fontSize / input.doc.internal.scaleFactor)
-	input.textHeigth = input.txtArray.map(txt => input.fontSize * 0.328) // 0.3528 = mm/pt
+	input.textWidth = input.options.txtArray.map(txt => input.doc.getStringUnitWidth(txt) * input.fontSize / input.doc.internal.scaleFactor)
+	input.textHeigth = input.options.txtArray.map(txt => input.fontSize * 0.328) // 0.3528 = mm/pt
 	input.xCoord = input.textWidth.map(w => input.options.x)
 	input.yCoord = input.textHeigth.map((h, index) => {
 		if (index > 0) {
@@ -98,8 +96,8 @@ function borderFormat(input) {
 
 
 function print(input) {
-	if (input.textParams) input.txtArray.forEach((txt, i) => input.doc.text(input.textParams.xCoord[i], input.textParams.yCoord[i], txt))
-	if (input.borderParams) input.txtArray.forEach((txt, i) => input.doc.rect(input.borderParams.xBorder[i],input.borderParams.yBorder[i],input.borderParams.borderWidth[i],input.borderParams.borderHeight[i]))
+	if (input.textParams) input.options.txtArray.forEach((txt, i) => input.doc.text(input.textParams.xCoord[i], input.textParams.yCoord[i], txt))
+	if (input.borderParams) input.options.txtArray.forEach((txt, i) => input.doc.rect(input.borderParams.xBorder[i],input.borderParams.yBorder[i],input.borderParams.borderWidth[i],input.borderParams.borderHeight[i]))
 	return Promise.resolve(input)
 //input.borderParams.xCoord[i], input.borderParams.yCoord[i], input.borderParams.borderWidth,input.borderParams.borderHeight
 }
