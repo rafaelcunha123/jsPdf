@@ -1,22 +1,23 @@
 r = require('ramda')
 
+//-- Text functions --
 function text(doc, options) {
-	return normalizeInput({
+	return normalizeTextInput({
 			doc,
 			options
 		})
 		.then(textFormat)
-		.then(normalizeInput)
+		.then(normalizeTextInput)
 		.then(textAlign)
 		.then(borderFormat)
 		.then(print)
 }
 
 
-function normalizeInput(input) {
+function normalizeTextInput(input) {
 
 	input.options = input.options || {}
-	if(input.options.txtArray) input.options.txtArray = Array.isArray(input.options.txtArray) ? input.options.txtArray : [input.options.txtArray]
+	if (input.options.txtArray) input.options.txtArray = Array.isArray(input.options.txtArray) ? input.options.txtArray : [input.options.txtArray]
 	input.options.x = input.options.x || 0
 	input.options.y = input.options.y || 0
 	input.options.lineSpacing = input.options.lineSpacing || 0.2
@@ -27,13 +28,13 @@ function normalizeInput(input) {
 	input.textHeigth = input.options.txtArray.map(txt => input.fontSize * 0.328) // 0.3528 = mm/pt
 	input.xCoord = input.textWidth.map(w => input.options.x)
 	input.yCoord = input.textHeigth.map((h, index) => {
-		if (index > 0) {
-			return input.options.y + input.textHeigth[0]+input.textHeigth.slice(0, index).reduce((a, b) => a + b)
-		} else {
-			return input.options.y + input.textHeigth[0]
-		}
-	})
-	//console.log(input)
+			if (index > 0) {
+				return input.options.y + input.textHeigth[0] + input.textHeigth.slice(0, index).reduce((a, b) => a + b)
+			} else {
+				return input.options.y + input.textHeigth[0]
+			}
+		})
+		//console.log(input)
 	return Promise.resolve(input)
 
 }
@@ -41,10 +42,10 @@ function normalizeInput(input) {
 function textFormat(input) {
 	let xCoord = clone(input.xCoord),
 		yCoord = clone(input.yCoord)
-	if (input.options.lineSpacing) yCoord = input.yCoord.map((y, i) => i > 0 ? y +i*input.options.lineSpacing*input.textHeigth[i] : y)
-	if(input.options.fontSize) input.doc.setFontSize(input.options.fontSize)
-	if(input.options.fontFamily && input.options.fontStyle) input.doc.setFont(input.options.fontFamily, input.options.fontStyle)
-	if(input.options.fontFamily) input.doc.setFont(input.options.fontFamily)
+	if (input.options.lineSpacing) yCoord = input.yCoord.map((y, i) => i > 0 ? y + i * input.options.lineSpacing * input.textHeigth[i] : y)
+	if (input.options.fontSize) input.doc.setFontSize(input.options.fontSize)
+	if (input.options.fontFamily && input.options.fontStyle) input.doc.setFont(input.options.fontFamily, input.options.fontStyle)
+	if (input.options.fontFamily) input.doc.setFont(input.options.fontFamily)
 
 	let resultParams = {
 		xCoord,
@@ -55,7 +56,7 @@ function textFormat(input) {
 	}))
 }
 
-function textAlign(input){
+function textAlign(input) {
 	if (input.options.align === 'center') input.textParams.xCoord = input.textWidth.map(w => (input.pageWidth - w) / 2)
 	return Promise.resolve(input)
 }
@@ -92,15 +93,67 @@ function borderFormat(input) {
 }
 
 
-
-
-
 function print(input) {
 	if (input.textParams) input.options.txtArray.forEach((txt, i) => input.doc.text(input.textParams.xCoord[i], input.textParams.yCoord[i], txt))
-	if (input.borderParams) input.options.txtArray.forEach((txt, i) => input.doc.rect(input.borderParams.xBorder[i],input.borderParams.yBorder[i],input.borderParams.borderWidth[i],input.borderParams.borderHeight[i]))
+	if (input.borderParams) input.options.txtArray.forEach((txt, i) => input.doc.rect(input.borderParams.xBorder[i], input.borderParams.yBorder[i], input.borderParams.borderWidth[i], input.borderParams.borderHeight[i]))
 	return Promise.resolve(input)
-//input.borderParams.xCoord[i], input.borderParams.yCoord[i], input.borderParams.borderWidth,input.borderParams.borderHeight
 }
+
+
+//-- Box functions
+
+function formBox(doc, options) {
+	return normalizeBoxInput({
+			doc,
+			options
+		})
+		.then(printBox)
+		.then(formatHeader)
+		.then(printHeader)
+
+}
+
+function normalizeBoxInput(input) {
+	input.options = input.options || {}
+	input.options.x = input.options.x || 0
+	input.options.y = input.options.y || 0
+	input.options.w = input.options.w || 10
+	input.options.h = input.options.h || 10
+
+	return Promise.resolve(input)
+
+}
+
+function formatHeader(input) {
+	if (input.options.header) {
+		input.options.header.fontSize = input.options.header.fontSize || 8
+		input.options.header.textHeigth = input.options.header.fontSize* 0.328
+		input.options.header.fontFamily = input.options.header.fontFamily || 'times'
+		input.options.header.fontStyle = input.options.header.fontStyle || 'normal'
+		input.options.header.padding = input.options.header.padding || 0.5
+
+		input.doc.setFontSize(input.options.header.fontSize)
+		input.doc.setFont(input.options.header.fontFamily, input.options.header.fontStyle)
+		return Promise.resolve(input)
+	} else {
+		return Promise.resolve(input)
+	}
+}
+
+function printBox(input) {
+	input.doc.rect(input.options.x, input.options.y, input.options.w, input.options.h)
+	return Promise.resolve(input)
+}
+
+function printHeader(input) {
+	console.log('hello')
+	input.doc.text(input.options.x + input.options.header.padding, input.options.y + input.options.header.textHeigth + input.options.header.padding, input.options.header.text)
+	return Promise.resolve(input)
+}
+
+
+
+//--General functions
 
 function saveDoc(input) {
 	input.doc.save('test.pdf', (err) => console.log('saved'))
@@ -116,4 +169,5 @@ module.exports = {
 	text,
 	print,
 	saveDoc,
+	formBox,
 }

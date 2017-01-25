@@ -27,4 +27,19 @@ actions.text(doc, {
 			fontSize: 12,
 		})
 	})
+	.then(input => {
+		console.log(input.doc)
+		return actions.formBox(input.doc, {
+			x: 10,
+			y: 20,
+			h: 10,
+			w: 50,
+			header:{
+				text: '1 - Registro ANS',
+				fontSize: 8,
+				fontStyle: 'normal',
+				fontFamily: 'times',
+			}
+		})
+	})
 	.then(actions.saveDoc)
