@@ -5,16 +5,15 @@ let doc = jsPdf('l', 'mm', 'a4')
 
 
 const settings = {
-	headerFontSize: 8,
+	headerFontSize: 6,
 	headerFont: 'times',
 	headerStyle: 'bold',
-	contentFontSize: 10,
-	blockDivisor: "|__",
-	contentFontSize: 10,
+	contentFontSize: 9,
 	contentFont: 'times',
 	contentFontStyle: 'normal',
+	blockDivisor: "|__",
 	dateBlock: '|__|__| / |__|__| / |__|__|__|__|',
-	leftMargin: 4
+	leftMargin: 3
 }
 
 function createBlock(divisor, length) {
@@ -55,8 +54,8 @@ actions.text(doc, {
 		return actions.formBox(input.doc, {
 			x: settings.leftMargin,
 			y: 20,
-			h: 10,
-			w: 28,
+			h: 7.28,
+			w: 26,
 			header: {
 				text: '1 - Registro ANS',
 				fontSize: settings.headerFontSize,
@@ -73,10 +72,10 @@ actions.text(doc, {
 	})
 	.then(input => {
 		return actions.formBox(input.doc, {
-			x: settings.leftMargin + 30,
+			x: settings.leftMargin + 27,
 			y: 20,
-			h: 10,
-			w: 88,
+			h: 7.28,
+			w: 78,
 			header: {
 				text: '3 - Numero da Guia Principal',
 				fontSize: settings.headerFontSize,
@@ -94,11 +93,11 @@ actions.text(doc, {
 	.then(input => {
 		return actions.formBox(input.doc, {
 			x: settings.leftMargin,
-			y: 32,
-			h: 10,
-			w: 43,
+			y: 29,
+			h: 7.28,
+			w: 39,
 			header: {
-				text: '4 - Data da Autorização',
+				text: '4 - Data da Autorizacao',
 				fontSize: settings.headerFontSize,
 				fontStyle: settings.headerStyle,
 				fontFamily: settings.headerFont,
@@ -113,10 +112,10 @@ actions.text(doc, {
 	})
 	.then(input => {
 		return actions.formBox(input.doc, {
-			x: settings.leftMargin + 45,
-			y: 32,
-			h: 10,
-			w: 87,
+			x: settings.leftMargin + 40,
+			y: 29,
+			h: 7.28,
+			w: 80,
 			header: {
 				text: '5 - Senha',
 				fontSize: settings.headerFontSize,
@@ -133,10 +132,10 @@ actions.text(doc, {
 	})
 	.then(input => {
 		return actions.formBox(input.doc, {
-			x: settings.leftMargin + 134,
-			y: 32,
-			h: 10,
-			w: 43,
+			x: settings.leftMargin + 122,
+			y: 29,
+			h: 7.28,
+			w: 39,
 			header: {
 				text: '6 - Validade da Senha',
 				fontSize: settings.headerFontSize,
@@ -153,10 +152,10 @@ actions.text(doc, {
 	})
 	.then(input => {
 		return actions.formBox(input.doc, {
-			x: settings.leftMargin + 179,
-			y: 32,
-			h: 10,
-			w: 87,
+			x: settings.leftMargin + 163,
+			y: 29,
+			h: 7.28,
+			w: 78,
 			header: {
 				text: '7 - Numero da Gua Atribuido pela Operadora',
 				fontSize: settings.headerFontSize,
@@ -172,22 +171,38 @@ actions.text(doc, {
 		})
 	})
 	.then(input => {
-		return actions.text(input.doc, {
-			txtArray: ['Dados do Beneficiario'],
-			x: settings.leftMargin,
-			y: 42,
-			fontSize: settings.headerFontSize,
-			fontStyle: settings.headerStyle,
-			fontFamily: settings.headerFont,
-		})
-	})
-	
-	.then(input => {
 		return actions.formBox(input.doc, {
 			x: settings.leftMargin,
-			y: 46,
-			h: 10,
-			w: 87,
+			y: 38,
+			h: 3,
+			w: 288,
+			header: {
+				text: 'Dados do Beneficiario',
+				fontSize: settings.headerFontSize,
+				fontStyle: settings.headerStyle,
+				fontFamily: settings.headerFont,
+				padding: 0,
+			},
+			style: {
+				fill: {
+					R: 192,
+					G: 192,
+					B: 192,
+				},
+				borderColor: {
+					R: 0,
+					G: 0,
+					B: 0,
+				}
+			}
+		})
+	})
+	.then(input => {
+		return actions.formBox(input.doc, {
+			x: settings.leftMargin ,
+			y: 43,
+			h: 7.28,
+			w: 78,
 			header: {
 				text: '8 - Numero da Carteira',
 				fontSize: settings.headerFontSize,
@@ -204,10 +219,10 @@ actions.text(doc, {
 	})
 	.then(input => {
 		return actions.formBox(input.doc, {
-			x: settings.leftMargin + 89,
-			y: 46,
-			h: 10,
-			w: 43,
+			x: settings.leftMargin + 79,
+			y: 43,
+			h: 7.28,
+			w: 39,
 			header: {
 				text: '9 - Validade da Carteira',
 				fontSize: settings.headerFontSize,
@@ -224,10 +239,10 @@ actions.text(doc, {
 	})
 	.then(input => {
 		return actions.formBox(input.doc, {
-			x: settings.leftMargin + 134,
-			y: 46,
-			h: 10,
-			w: 43,
+			x: settings.leftMargin + 119,
+			y: 43,
+			h: 7.28,
+			w: 86,
 			header: {
 				text: '10 - Nome',
 				fontSize: settings.headerFontSize,
@@ -236,6 +251,43 @@ actions.text(doc, {
 			},
 			content: {
 				text: "",
+			}
+		})
+	})
+	.then(input => {
+		return actions.formBox(input.doc, {
+			x: settings.leftMargin + 206,
+			y: 43,
+			h: 7.28,
+			w: 60,
+			header: {
+				text: '11 - Cartao Nacional de Saude',
+				fontSize: settings.headerFontSize,
+				fontStyle: settings.headerStyle,
+				fontFamily: settings.headerFont,
+			},
+			content: {
+				text: createBlock('|__', 15),
+				fontSize: settings.contentFontSize,
+				fontStyle: settings.contentFontStyle,
+				fontFamily: settings.contentFont,
+			}
+		})
+	})
+	.then(input => {
+		return actions.formBox(input.doc, {
+			x: 297 - 2*settings.leftMargin + -21.33,
+			y: 43,
+			h: 7.28,
+			w: 21.33,
+			header: {
+				text: '12 - Atendimento RN',
+				fontSize: settings.headerFontSize,
+				fontStyle: settings.headerStyle,
+				fontFamily: settings.headerFont,
+			},
+			content: {
+				text: "  	"+ createBlock('|__', 1),
 				fontSize: settings.contentFontSize,
 				fontStyle: settings.contentFontStyle,
 				fontFamily: settings.contentFont,
