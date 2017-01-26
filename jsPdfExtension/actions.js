@@ -110,7 +110,8 @@ function formBox(doc, options) {
 		.then(printBox)
 		.then(formatHeader)
 		.then(printHeader)
-
+		.then(formatContent)
+		.then(printContent)
 }
 
 function normalizeBoxInput(input) {
@@ -140,17 +141,40 @@ function formatHeader(input) {
 	}
 }
 
+function formatContent(input){
+	if (input.options.content) {
+		input.options.content.fontSize = input.options.content.fontSize || 12
+		input.options.content.textHeigth = input.options.content.fontSize* 0.328
+		input.options.content.fontFamily = input.options.content.fontFamily || 'times'
+		input.options.content.fontStyle = input.options.content.fontStyle || 'normal'
+		input.options.content.padding = input.options.content.padding || 0.8
+
+		input.doc.setFontSize(input.options.content.fontSize)
+		input.doc.setFont(input.options.content.fontFamily, input.options.content.fontStyle)
+		return Promise.resolve(input)
+	} else {
+		return Promise.resolve(input)
+	}	
+}
+
 function printBox(input) {
 	input.doc.rect(input.options.x, input.options.y, input.options.w, input.options.h)
 	return Promise.resolve(input)
 }
 
 function printHeader(input) {
-	console.log('hello')
-	input.doc.text(input.options.x + input.options.header.padding, input.options.y + input.options.header.textHeigth + input.options.header.padding, input.options.header.text)
-	return Promise.resolve(input)
+	if (input.options.header && input.options.header.text) {
+		input.doc.text(input.options.x + input.options.header.padding, input.options.y + input.options.header.textHeigth + input.options.header.padding, input.options.header.text)
+		return Promise.resolve(input)
+	} else return Promise.resolve(input)
 }
 
+function printContent (input) {
+	if (input.options.content && input.options.content.text) {
+		input.doc.text(input.options.x + input.options.content.padding, input.options.y + input.options.h - input.options.content.padding, input.options.content.text)
+		return Promise.resolve(input)
+	} else return Promise.resolve(input)
+}
 
 
 //--General functions
