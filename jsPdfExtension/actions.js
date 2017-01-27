@@ -121,6 +121,18 @@ function normalizeBoxInput(input) {
 	input.options.w = input.options.w || 10
 	input.options.h = input.options.h || 10
 
+	input.options.style = input.options.style || {} 
+
+	input.options.style.fill = input.options.style.fill || {}
+	input.options.style.fill.R = input.options.style.fill.R || 255
+	input.options.style.fill.G = input.options.style.fill.G || 255
+	input.options.style.fill.B = input.options.style.fill.B || 255
+	
+	input.options.style.borderColor = input.options.style.borderColor || {}
+	input.options.style.borderColor.R = input.options.style.borderColor.R || 0
+	input.options.style.borderColor.G = input.options.style.borderColor.G || 0
+	input.options.style.borderColor.B = input.options.style.borderColor.B || 0
+
 	return Promise.resolve(input)
 
 }
@@ -157,8 +169,11 @@ function formatContent(input){
 	}	
 }
 
+
 function printBox(input) {
-	input.doc.rect(input.options.x, input.options.y, input.options.w, input.options.h)
+	input.doc.setDrawColor(input.options.style.borderColor.R, input.options.style.borderColor.G, input.options.style.borderColor.B)
+	input.doc.setFillColor(input.options.style.fill.R, input.options.style.fill.G, input.options.style.fill.B)
+	input.doc.rect(input.options.x, input.options.y, input.options.w, input.options.h, 'FD')
 	return Promise.resolve(input)
 }
 
