@@ -1,4 +1,7 @@
-r = require('ramda')
+const r = require('ramda')
+const path = require('path')
+const uuidV1 = require('uuid/v1')
+
 
 //-- Text functions --
 function text(doc, options) {
@@ -121,13 +124,13 @@ function normalizeBoxInput(input) {
 	input.options.w = input.options.w || 10
 	input.options.h = input.options.h || 10
 
-	input.options.style = input.options.style || {} 
+	input.options.style = input.options.style || {}
 
 	input.options.style.fill = input.options.style.fill || {}
 	input.options.style.fill.R = input.options.style.fill.R || 255
 	input.options.style.fill.G = input.options.style.fill.G || 255
 	input.options.style.fill.B = input.options.style.fill.B || 255
-	
+
 	input.options.style.borderColor = input.options.style.borderColor || {}
 	input.options.style.borderColor.R = input.options.style.borderColor.R || 0
 	input.options.style.borderColor.G = input.options.style.borderColor.G || 0
@@ -140,7 +143,7 @@ function normalizeBoxInput(input) {
 function formatHeader(input) {
 	if (input.options.header) {
 		input.options.header.fontSize = input.options.header.fontSize || 8
-		input.options.header.textHeigth = input.options.header.fontSize* 0.328
+		input.options.header.textHeigth = input.options.header.fontSize * 0.328
 		input.options.header.fontFamily = input.options.header.fontFamily || 'times'
 		input.options.header.fontStyle = input.options.header.fontStyle || 'normal'
 		input.options.header.padding = input.options.header.padding || 0.5
@@ -153,10 +156,10 @@ function formatHeader(input) {
 	}
 }
 
-function formatContent(input){
+function formatContent(input) {
 	if (input.options.content) {
 		input.options.content.fontSize = input.options.content.fontSize || 12
-		input.options.content.textHeigth = input.options.content.fontSize* 0.328
+		input.options.content.textHeigth = input.options.content.fontSize * 0.328
 		input.options.content.fontFamily = input.options.content.fontFamily || 'times'
 		input.options.content.fontStyle = input.options.content.fontStyle || 'normal'
 		input.options.content.padding = input.options.content.padding || 0.8
@@ -166,7 +169,7 @@ function formatContent(input){
 		return Promise.resolve(input)
 	} else {
 		return Promise.resolve(input)
-	}	
+	}
 }
 
 
@@ -184,7 +187,7 @@ function printHeader(input) {
 	} else return Promise.resolve(input)
 }
 
-function printContent (input) {
+function printContent(input) {
 	if (input.options.content && input.options.content.text) {
 		input.doc.text(input.options.x + input.options.content.padding, input.options.y + input.options.h - input.options.content.padding, input.options.content.text)
 		return Promise.resolve(input)
@@ -195,8 +198,19 @@ function printContent (input) {
 //--General functions
 
 function saveDoc(input) {
-	input.doc.save('test.pdf', (err) => console.log('saved'))
+	const key = uuidV1() + '.pdf'
+	console.log(path.join(__dirname, '../savedPdfs/', key))
+	input.uuid = key
+
+	return new Promise((resolve, reject) => {
+		input.doc.save(path.join(__dirname, '../savedPdfs/', key), (err) => {
+			if (err) reject(err)
+			console.log('saved')
+			resolve(input)
+		})
+	})
 }
+
 
 
 function clone(array) {
