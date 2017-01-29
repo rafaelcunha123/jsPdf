@@ -18,7 +18,7 @@ const valorTotalSchema = joi.object().keys({
 })
 
 
-const profissionaisSchema = joi.object().keys({
+const profissionaisSchema = joi.array().items({
 	sequencialReferencia: joi.number().integer().min(1).max(99),
 	grauParticipacao: joi.string().valid(lists.grauPart),
 	codProfissional: joi.object().keys({
@@ -30,7 +30,7 @@ const profissionaisSchema = joi.object().keys({
 	numeroConselhoProfissional: joi.string().min(1).max(15),
 	UF: joi.string().valid(lists.UF),
 	CBOS: joi.string().valid(lists.CBOS)
-})
+}).max(4)
 
 const procedimentosRealizadosSchema = joi.array().items({
 		dataExecucao: customJoi.string().isDateStr(),
@@ -44,7 +44,7 @@ const procedimentosRealizadosSchema = joi.array().items({
 		valorUnitario: joi.string().regex(/^\d{1,8}(\.\d{0,2})?$/),
 		valorTotal: joi.string().regex(/^\d{1,8}(\.\d{0,4})?$/),
 		profissionais: profissionaisSchema
-}).length(5)
+}).max(5)
 
 
 const dadosAtendimentoSchema = joi.object().keys({
@@ -97,7 +97,7 @@ const guiaSPSADTSchema = joi.object().keys({
 	dadosBeneficiario: commonSchemas.dadosBeneficiarioSchema,
 	dadosSolicitante: dadosSolicitanteSchema,
 	dadosSolicitacao: dadosSolicitacaoSchema,
-	procedimentosSolicitados: joi.array().items(procedimentosSolicitados).length(5),
+	procedimentosSolicitados: joi.array().items(procedimentosSolicitados).max(5),
 	dadosExecutante: dadosExecutanteSchema,
 	dadosAtendimento: dadosAtendimentoSchema,
 	procedimentosRealizados: procedimentosRealizadosSchema,

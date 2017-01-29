@@ -23,20 +23,42 @@ function formatDate(dateString) {
 	return formatDate
 }
 
-function findDadosSolicitante(contratadoSolicitante) {
-	if (contratadoSolicitante.cpfContratado) return contratadoSolicitante.cpfContratado
-	if (contratadoSolicitante.cnpjContratado) return contratadoSolicitante.cnpjContratado
-	if (contratadoSolicitante.codigoPrestadorNaOperadora) return contratadoSolicitante.codigoPrestadorNaOperadora
+function findDadosIdentificacao(identification) {
+	if (identification.cpfContratado) return identification.cpfContratado
+	if (identification.cnpjContratado) return identification.cnpjContratado
+	if (identification.codigoPrestadorNaOperadora) return identification.codigoPrestadorNaOperadora
 	return undefined
 }
 
 function existsProcedimento(data, index, field) {
-	if (_.has(data, 'procedimentosExecutados') && data.procedimentosExecutados[index] && data.procedimentosExecutados[index].procedimentoExecutado) {
-		if (_.has(data.procedimentosExecutados[index].procedimentoExecutado, field)) {
-			console.log(_.get(data.procedimentosExecutados[index].procedimentoExecutado, field))
-			return _.get(data.procedimentosExecutados[index].procedimentoExecutado, field)
+	if (_.has(data, 'procedimentosSolicitados') && data.procedimentosSolicitados[index]) {
+		if (_.has(data.procedimentosSolicitados[index], field)) {
+			return _.get(data.procedimentosSolicitados[index], field)
 		} else false
 	} else return false
+}
+
+function existsProcedimentoRealizado(data, index, field) {
+	if (_.has(data, 'procedimentosRealizados') && data.procedimentosRealizados[index]) {
+		if (_.has(data.procedimentosRealizados[index], field)) {
+			return _.get(data.procedimentosRealizados[index], field)
+		} else return false
+	} else return false
+}
+
+function buildInterval(data, index) {
+	if (data.procedimentosRealizados && data.procedimentosRealizados[index]) {
+		if (data.procedimentosRealizados[index].horaInicial) {
+			if(data.procedimentosRealizados[index].horaFinal){
+				return data.procedimentosRealizados[index].horaInicial.slice(0,5) + '          a          ' + data.procedimentosRealizados[index].horaFinal.slice(0,5)
+			} else {
+				return data.procedimentosRealizados[index].horaInicial  + '      a |___|___|:|___|___|'
+			}
+		} else if (data.procedimentosRealizados[index].horaFinal) {
+				return '|___|___|:|___|___| a       ' + data.procedimentosRealizados[index].horaFinal
+		} else return '|___|___|:|___|___| a |___|___|:|___|___|'
+	}
+	return '|___|___|:|___|___| a |___|___|:|___|___|'
 }
 
 
@@ -372,7 +394,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock(settings.blockDivisor, 14),
+					text: _.has(data, 'dadosSolicitante.contratadoSolicitante') ? (findDadosIdentificacao(data.dadosSolicitante.contratadoSolicitante) ? findDadosIdentificacao(data.dadosSolicitante.contratadoSolicitante) : createBlock(settings.blockDivisor, 14)) : createBlock(settings.blockDivisor, 14),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -392,7 +414,10 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: "",
+					text: _.has(data, 'dadosSolicitante.contratadoSolicitante.nomeContratado') ? data.dadosSolicitante.contratadoSolicitante.nomeContratado : "",
+					fontSize: settings.contentFontSize,
+					fontStyle: settings.contentFontStyle,
+					fontFamily: settings.contentFont,
 				}
 			})
 		})
@@ -409,7 +434,10 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: '',
+					text: _.has(data, 'dadosSolicitante.profissionalSolicitante.nomeProfissional') ? data.dadosSolicitante.profissionalSolicitante.nomeProfissional : "",
+					fontSize: settings.contentFontSize,
+					fontStyle: settings.contentFontStyle,
+					fontFamily: settings.contentFont,
 				}
 			})
 		})
@@ -420,9 +448,9 @@ exports.spsadt = function(validData) {
 				h: 7.28,
 				w: 14,
 				content: {
-					text: '    ' + createBlock('|___', 2),
+					text: _.has(data, 'dadosSolicitante.profissionalSolicitante.conselhoProfissional') ? '       ' + data.dadosSolicitante.profissionalSolicitante.conselhoProfissional : '    ' + createBlock('|___', 2),
 					fontSize: settings.headerFontSize,
-					fontStyle: settings.headerStyle,
+					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.headerFont,
 				}
 			})
@@ -451,7 +479,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock(settings.blockDivisor, 15),
+					text: _.has(data, 'dadosSolicitante.profissionalSolicitante.numeroConselhoProfissional') ? data.dadosSolicitante.profissionalSolicitante.numeroConselhoProfissional : createBlock(settings.blockDivisor, 15),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -471,7 +499,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock(settings.blockDivisor, 2),
+					text: _.has(data, 'dadosSolicitante.profissionalSolicitante.UF') ? data.dadosSolicitante.profissionalSolicitante.UF : createBlock(settings.blockDivisor, 2),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -491,7 +519,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock(settings.blockDivisor, 6),
+					text: _.has(data, 'dadosSolicitante.profissionalSolicitante.CBOS') ? data.dadosSolicitante.profissionalSolicitante.CBOS : createBlock(settings.blockDivisor, 6),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -549,7 +577,7 @@ exports.spsadt = function(validData) {
 				h: 7.28,
 				w: 14.5,
 				content: {
-					text: '        ' + createBlock('|___', 1),
+					text: _.has(data, 'dadosSolicitacao.caraterAtendimento') ? '        ' + data.dadosSolicitacao.caraterAtendimento : '        ' + createBlock('|___', 1),
 					fontSize: settings.headerFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -580,7 +608,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: settings.dateBlock,
+					text: _.has(data, 'dadosSolicitacao.dataSolicitacao') ? formatDate(data.dadosSolicitacao.dataSolicitacao) : settings.dateBlock,
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -600,7 +628,10 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: '',
+					text: _.has(data, 'dadosSolicitacao.indicacaoClinica') ? data.dadosSolicitacao.indicacaoClinica.slice(0, 178) : '',
+					fontSize: settings.contentFontSize,
+					fontStyle: settings.contentFontStyle,
+					fontFamily: settings.contentFont,
 				}
 			})
 		})
@@ -616,7 +647,7 @@ exports.spsadt = function(validData) {
 			return actions.text(input.doc, {
 				txtArray: ['24 - Tabela'],
 				x: settings.leftMargin + 0.5,
-				y: 71.5,
+				y: 73,
 				fontSize: settings.headerFontSize,
 				fontStyle: settings.headerStyle,
 				fontFamily: settings.headerFont,
@@ -669,7 +700,7 @@ exports.spsadt = function(validData) {
 
 	.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '1 - ' + createBlock('|___', 2),
+				txtArray: '1 - ' + (existsProcedimento(data, 0, 'procedimento.codigoTabela') ? existsProcedimento(data, 0, 'procedimento.codigoTabela') : createBlock('|___', 2)),
 				x: settings.leftMargin + 0.5,
 				y: 78.5,
 				fontSize: 6.3,
@@ -679,7 +710,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 10),
+				txtArray: existsProcedimento(data, 0, 'procedimento.codigoProcedimento') ? existsProcedimento(data, 0, 'procedimento.codigoProcedimento') : createBlock('|___', 10),
 				x: settings.leftMargin + 13,
 				y: 78.5,
 				fontSize: 6.3,
@@ -689,7 +720,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '_____________________________________________________________________________________________________________________________________________________________________________________',
+				txtArray: existsProcedimento(data, 0, 'procedimento.descricaoProcedimento') ? existsProcedimento(data, 0, 'procedimento.descricaoProcedimento') : '_____________________________________________________________________________________________________________________________________________________________________________________',
 				x: settings.leftMargin + 53,
 				y: 78.5,
 				fontSize: 6.3,
@@ -699,7 +730,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimento(data, 0, 'quantidadeSolicitada') ? ("       00" + existsProcedimento(data, 0, 'quantidadeSolicitada')).slice(-3) : createBlock('|___', 3),
 				x: settings.leftMargin + 257,
 				y: 78.5,
 				fontSize: 6.3,
@@ -709,7 +740,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimento(data, 0, 'quantidadeAutorizada') ? ("       00" + existsProcedimento(data, 0, 'quantidadeAutorizada')).slice(-3) : createBlock('|___', 3),
 				x: settings.leftMargin + 275,
 				y: 78.5,
 				fontSize: 6.3,
@@ -720,7 +751,7 @@ exports.spsadt = function(validData) {
 
 	.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '2 - ' + createBlock('|___', 2),
+				txtArray: '2 - ' + (existsProcedimento(data, 1, 'procedimento.codigoTabela') ? existsProcedimento(data, 1, 'procedimento.codigoTabela') : createBlock('|___', 2)),
 				x: settings.leftMargin + 0.5,
 				y: 82.5,
 				fontSize: 6.3,
@@ -730,7 +761,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 10),
+				txtArray: existsProcedimento(data, 1, 'procedimento.codigoProcedimento') ? existsProcedimento(data, 1, 'procedimento.codigoProcedimento') : createBlock('|___', 10),
 				x: settings.leftMargin + 13,
 				y: 82.5,
 				fontSize: 6.3,
@@ -740,7 +771,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '_____________________________________________________________________________________________________________________________________________________________________________________',
+				txtArray: existsProcedimento(data, 1, 'procedimento.descricaoProcedimento') ? existsProcedimento(data, 1, 'procedimento.descricaoProcedimento') : '_____________________________________________________________________________________________________________________________________________________________________________________',
 				x: settings.leftMargin + 53,
 				y: 82.5,
 				fontSize: 6.3,
@@ -750,7 +781,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimento(data, 1, 'quantidadeSolicitada') ? ("       00" + existsProcedimento(data, 1, 'quantidadeSolicitada')).slice(-3) : createBlock('|___', 3),
 				x: settings.leftMargin + 257,
 				y: 82.5,
 				fontSize: 6.3,
@@ -760,7 +791,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimento(data, 1, 'quantidadeAutorizada') ? ("       00" + existsProcedimento(data, 1, 'quantidadeAutorizada')).slice(-3) : createBlock('|___', 3),
 				x: settings.leftMargin + 275,
 				y: 82.5,
 				fontSize: 6.3,
@@ -772,7 +803,7 @@ exports.spsadt = function(validData) {
 
 	.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '3 - ' + createBlock('|___', 2),
+				txtArray: '3 - ' + (existsProcedimento(data, 2, 'procedimento.codigoTabela') ? existsProcedimento(data, 2, 'procedimento.codigoTabela') : createBlock('|___', 2)),
 				x: settings.leftMargin + 0.5,
 				y: 86,
 				fontSize: 6.3,
@@ -782,7 +813,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 10),
+				txtArray: existsProcedimento(data, 2, 'procedimento.codigoProcedimento') ? existsProcedimento(data, 2, 'procedimento.codigoProcedimento') : createBlock('|___', 10),
 				x: settings.leftMargin + 13,
 				y: 86,
 				fontSize: 6.3,
@@ -792,7 +823,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '_____________________________________________________________________________________________________________________________________________________________________________________',
+				txtArray: existsProcedimento(data, 2, 'procedimento.descricaoProcedimento') ? existsProcedimento(data, 2, 'procedimento.descricaoProcedimento') : '_____________________________________________________________________________________________________________________________________________________________________________________',
 				x: settings.leftMargin + 53,
 				y: 86,
 				fontSize: 6.3,
@@ -802,7 +833,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimento(data, 2, 'quantidadeSolicitada') ? ("       00" + existsProcedimento(data, 2, 'quantidadeSolicitada')).slice(-3) : createBlock('|___', 3),
 				x: settings.leftMargin + 257,
 				y: 86,
 				fontSize: 6.3,
@@ -812,7 +843,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimento(data, 2, 'quantidadeAutorizada') ? ("       00" + existsProcedimento(data, 2, 'quantidadeAutorizada')).slice(-3) : createBlock('|___', 3),
 				x: settings.leftMargin + 275,
 				y: 86,
 				fontSize: 6.3,
@@ -824,7 +855,7 @@ exports.spsadt = function(validData) {
 
 	.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '4 - ' + createBlock('|___', 2),
+				txtArray: '4 - ' + (existsProcedimento(data, 3, 'procedimento.codigoTabela') ? existsProcedimento(data, 3, 'procedimento.codigoTabela') : createBlock('|___', 2)),
 				x: settings.leftMargin + 0.5,
 				y: 89.5,
 				fontSize: 6.3,
@@ -834,7 +865,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 10),
+				txtArray: existsProcedimento(data, 3, 'procedimento.codigoProcedimento') ? existsProcedimento(data, 3, 'procedimento.codigoProcedimento') : createBlock('|___', 10),
 				x: settings.leftMargin + 13,
 				y: 89.5,
 				fontSize: 6.3,
@@ -844,7 +875,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '_____________________________________________________________________________________________________________________________________________________________________________________',
+				txtArray: existsProcedimento(data, 3, 'procedimento.descricaoProcedimento') ? existsProcedimento(data, 3, 'procedimento.descricaoProcedimento') : '_____________________________________________________________________________________________________________________________________________________________________________________',
 				x: settings.leftMargin + 53,
 				y: 89.5,
 				fontSize: 6.3,
@@ -854,7 +885,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimento(data, 3, 'quantidadeSolicitada') ? ("       00" + existsProcedimento(data, 3, 'quantidadeSolicitada')).slice(-3) : createBlock('|___', 3),
 				x: settings.leftMargin + 257,
 				y: 89.5,
 				fontSize: 6.3,
@@ -864,7 +895,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimento(data, 3, 'quantidadeAutorizada') ? ("       00" + existsProcedimento(data, 3, 'quantidadeAutorizada')).slice(-3) : createBlock('|___', 3),
 				x: settings.leftMargin + 275,
 				y: 89.5,
 				fontSize: 6.3,
@@ -875,7 +906,7 @@ exports.spsadt = function(validData) {
 
 	.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '5 - ' + createBlock('|___', 2),
+				txtArray: '5 - ' + (existsProcedimento(data, 4, 'procedimento.codigoTabela') ? existsProcedimento(data, 4, 'procedimento.codigoTabela') : createBlock('|___', 2)),
 				x: settings.leftMargin + 0.5,
 				y: 93,
 				fontSize: 6.3,
@@ -885,7 +916,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 10),
+				txtArray: existsProcedimento(data, 4, 'procedimento.codigoProcedimento') ? existsProcedimento(data, 4, 'procedimento.codigoProcedimento') : createBlock('|___', 10),
 				x: settings.leftMargin + 13,
 				y: 93,
 				fontSize: 6.3,
@@ -895,7 +926,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '_____________________________________________________________________________________________________________________________________________________________________________________',
+				txtArray: existsProcedimento(data, 4, 'procedimento.descricaoProcedimento') ? existsProcedimento(data, 4, 'procedimento.descricaoProcedimento') : '_____________________________________________________________________________________________________________________________________________________________________________________',
 				x: settings.leftMargin + 53,
 				y: 93,
 				fontSize: 6.3,
@@ -905,7 +936,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimento(data, 4, 'quantidadeSolicitada') ? ("       00" + existsProcedimento(data, 4, 'quantidadeSolicitada')).slice(-3) : createBlock('|___', 3),
 				x: settings.leftMargin + 257,
 				y: 93,
 				fontSize: 6.3,
@@ -915,7 +946,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimento(data, 3, 'quantidadeAutorizada') ? ("       00" + existsProcedimento(data, 3, 'quantidadeAutorizada')).slice(-3) : createBlock('|___', 3),
 				x: settings.leftMargin + 275,
 				y: 93,
 				fontSize: 6.3,
@@ -964,7 +995,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock(settings.blockDivisor, 14),
+					text: _.has(data, 'dadosExecutante.contratadoExecutante') ? findDadosIdentificacao(data.dadosExecutante.contratadoExecutante) : createBlock(settings.blockDivisor, 14),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -984,7 +1015,10 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: "",
+					text: _.has(data, 'dadosExecutante.contratadoExecutante.nomeContratado') ? data.dadosExecutante.contratadoExecutante.nomeContratado : "",
+					fontSize: settings.contentFontSize,
+					fontStyle: settings.contentFontStyle,
+					fontFamily: settings.contentFont,
 				}
 			})
 		})
@@ -1001,7 +1035,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock(settings.blockDivisor, 7),
+					text: _.has(data, 'dadosExecutante.CNES') ? data.dadosExecutante.CNES : createBlock(settings.blockDivisor, 7),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -1048,7 +1082,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: '         ' + createBlock(settings.blockDivisor, 2),
+					text: _.has(data, 'dadosAtendimento.tipoAtendimento') ? data.dadosAtendimento.tipoAtendimento.toString() : '         ' + createBlock(settings.blockDivisor, 2),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -1068,7 +1102,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: '                             ' + createBlock(settings.blockDivisor, 1),
+					text: _.has(data, 'dadosAtendimento.indicacaoAcidente') ? data.dadosAtendimento.indicacaoAcidente.toString() : '                             ' + createBlock(settings.blockDivisor, 1),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -1088,7 +1122,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: '           ' + createBlock(settings.blockDivisor, 1),
+					text: _.has(data, 'dadosAtendimento.tipoConsulta') ? data.dadosAtendimento.tipoConsulta.toString() : '           ' + createBlock(settings.blockDivisor, 1),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -1108,7 +1142,7 @@ exports.spsadt = function(validData) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: '                       ' + createBlock(settings.blockDivisor, 1),
+					text: _.has(data, 'dadosAtendimento.motivoEncerramento') ? '                       ' + data.dadosAtendimento.motivoEncerramento.toString() : '                       ' + createBlock(settings.blockDivisor, 1),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -1287,7 +1321,7 @@ exports.spsadt = function(validData) {
 
 	.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '1 - ' + '|___|___|/|___|___|/|___|___|___|___|',
+				txtArray: '1 - ' + (existsProcedimentoRealizado(data, 0, 'dataExecucao') ? existsProcedimentoRealizado(data, 0, 'dataExecucao') : '|___|___|/|___|___|/|___|___|___|___|'),
 				x: settings.leftMargin + 0.5,
 				y: 126,
 				fontSize: 6.3,
@@ -1297,7 +1331,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: settings.intervalBlock,
+				txtArray: buildInterval(data, 0),
 				x: settings.leftMargin + 37,
 				y: 126,
 				fontSize: 6.3,
@@ -1307,7 +1341,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 2),
+				txtArray: existsProcedimentoRealizado(data, 0, 'procedimento.codigoTabela') ? existsProcedimentoRealizado(data, 0, 'procedimento.codigoTabela') : createBlock('|___', 2),
 				x: settings.leftMargin + 65,
 				y: 126,
 				fontSize: 6.3,
@@ -1317,7 +1351,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock(settings.blockDivisor, 10),
+				txtArray: existsProcedimentoRealizado(data, 0, 'procedimento.codigoProcedimento') ? existsProcedimentoRealizado(data, 0, 'procedimento.codigoProcedimento') : createBlock(settings.blockDivisor, 10),
 				x: settings.leftMargin + 75,
 				y: 126,
 				fontSize: 6.3,
@@ -1327,7 +1361,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '_____________________________________________________________',
+				txtArray: existsProcedimentoRealizado(data, 0, 'procedimento.descricaoProcedimento') ? existsProcedimentoRealizado(data, 0, 'procedimento.descricaoProcedimento') : '_____________________________________________________________',
 				x: settings.leftMargin + 104,
 				y: 126,
 				fontSize: 6.3,
@@ -1337,7 +1371,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimentoRealizado(data, 0, 'quantidadeExecutada') ? existsProcedimentoRealizado(data, 0, 'quantidadeExecutada') : createBlock('|___', 3),
 				x: settings.leftMargin + 172.5,
 				y: 126,
 				fontSize: 6.3,
@@ -1347,7 +1381,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 1),
+				txtArray: existsProcedimentoRealizado(data, 0, 'viaAcesso') ? existsProcedimentoRealizado(data, 0, 'viaAcesso') : createBlock('|___', 1),
 				x: settings.leftMargin + 186.5,
 				y: 126,
 				fontSize: 6.3,
@@ -1357,7 +1391,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 1),
+				txtArray: existsProcedimentoRealizado(data, 0, 'tecnicaUtilizada') ? existsProcedimentoRealizado(data, 0, 'tecnicaUtilizada') :  createBlock('|___', 1),
 				x: settings.leftMargin + 193,
 				y: 126,
 				fontSize: 6.3,
@@ -1367,7 +1401,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 0, 'reducaoAcrescimo') ? existsProcedimentoRealizado(data, 0, 'reducaoAcrescimo') : '|___|,|___|___|',
 				x: settings.leftMargin + 203,
 				y: 126,
 				fontSize: 6.3,
@@ -1377,7 +1411,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|___|___|___|___|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 0, 'valorUnitario') ? existsProcedimentoRealizado(data, 0, 'valorUnitario') : '|___|___|___|___|___|___|,|___|___|',
 				x: settings.leftMargin + 222,
 				y: 126,
 				fontSize: 6.3,
@@ -1387,7 +1421,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|___|___|___|___|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 0, 'valorTotal') ? existsProcedimentoRealizado(data, 0, 'valorTotal') : '|___|___|___|___|___|___|,|___|___|',
 				x: settings.leftMargin + 256,
 				y: 126,
 				fontSize: 6.3,
@@ -1400,7 +1434,7 @@ exports.spsadt = function(validData) {
 
 	.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '2 - ' + '|___|___|/|___|___|/|___|___|___|___|',
+				txtArray: '2 - ' + (existsProcedimentoRealizado(data, 1, 'dataExecucao') ? existsProcedimentoRealizado(data, 1, 'dataExecucao') : '|___|___|/|___|___|/|___|___|___|___|'),
 				x: settings.leftMargin + 0.5,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1410,7 +1444,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: settings.intervalBlock,
+				txtArray: buildInterval(data, 1),
 				x: settings.leftMargin + 37,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1420,7 +1454,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 2),
+				txtArray: existsProcedimentoRealizado(data, 1, 'procedimento.codigoTabela') ? existsProcedimentoRealizado(data, 1, 'procedimento.codigoTabela') : createBlock('|___', 2),
 				x: settings.leftMargin + 65,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1430,7 +1464,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock(settings.blockDivisor, 10),
+				txtArray: existsProcedimentoRealizado(data, 1, 'procedimento.codigoProcedimento') ? existsProcedimentoRealizado(data, 1, 'procedimento.codigoProcedimento') : createBlock(settings.blockDivisor, 10),
 				x: settings.leftMargin + 75,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1440,7 +1474,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '_____________________________________________________________',
+				txtArray: existsProcedimentoRealizado(data, 1, 'procedimento.descricaoProcedimento') ? existsProcedimentoRealizado(data, 1, 'procedimento.descricaoProcedimento') : '_____________________________________________________________',
 				x: settings.leftMargin + 104,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1450,7 +1484,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimentoRealizado(data, 1, 'quantidadeExecutada') ? existsProcedimentoRealizado(data, 1, 'quantidadeExecutada') : createBlock('|___', 3),
 				x: settings.leftMargin + 172.5,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1460,7 +1494,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 1),
+				txtArray: existsProcedimentoRealizado(data, 1, 'viaAcesso') ? existsProcedimentoRealizado(data, 1, 'viaAcesso') : createBlock('|___', 1),
 				x: settings.leftMargin + 186.5,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1470,7 +1504,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 1),
+				txtArray: existsProcedimentoRealizado(data, 1, 'tecnicaUtilizada') ? existsProcedimentoRealizado(data, 1, 'tecnicaUtilizada') :  createBlock('|___', 1),
 				x: settings.leftMargin + 193,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1480,7 +1514,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 1, 'reducaoAcrescimo') ? existsProcedimentoRealizado(data, 1, 'reducaoAcrescimo') : '|___|,|___|___|',
 				x: settings.leftMargin + 203,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1490,7 +1524,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|___|___|___|___|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 1, 'valorUnitario') ? existsProcedimentoRealizado(data, 1, 'valorUnitario') : '|___|___|___|___|___|___|,|___|___|',
 				x: settings.leftMargin + 222,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1500,7 +1534,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|___|___|___|___|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 1, 'valorTotal') ? existsProcedimentoRealizado(data, 1, 'valorTotal') : '|___|___|___|___|___|___|,|___|___|',
 				x: settings.leftMargin + 256,
 				y: 129.5,
 				fontSize: 6.3,
@@ -1512,7 +1546,7 @@ exports.spsadt = function(validData) {
 
 	.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '3 - ' + '|___|___|/|___|___|/|___|___|___|___|',
+				txtArray: '3 - ' + (existsProcedimentoRealizado(data, 2, 'dataExecucao') ? existsProcedimentoRealizado(data, 2, 'dataExecucao') : '|___|___|/|___|___|/|___|___|___|___|'),
 				x: settings.leftMargin + 0.5,
 				y: 133,
 				fontSize: 6.3,
@@ -1522,7 +1556,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: settings.intervalBlock,
+				txtArray: buildInterval(data, 2),
 				x: settings.leftMargin + 37,
 				y: 133,
 				fontSize: 6.3,
@@ -1532,7 +1566,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 2),
+				txtArray: existsProcedimentoRealizado(data, 2, 'procedimento.codigoTabela') ? existsProcedimentoRealizado(data, 2, 'procedimento.codigoTabela') : createBlock('|___', 2),
 				x: settings.leftMargin + 65,
 				y: 133,
 				fontSize: 6.3,
@@ -1542,7 +1576,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock(settings.blockDivisor, 10),
+				txtArray: existsProcedimentoRealizado(data, 2, 'procedimento.codigoProcedimento') ? existsProcedimentoRealizado(data, 2, 'procedimento.codigoProcedimento') : createBlock(settings.blockDivisor, 10),
 				x: settings.leftMargin + 75,
 				y: 133,
 				fontSize: 6.3,
@@ -1552,7 +1586,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '_____________________________________________________________',
+				txtArray: existsProcedimentoRealizado(data, 2, 'procedimento.descricaoProcedimento') ? existsProcedimentoRealizado(data, 2, 'procedimento.descricaoProcedimento') : '_____________________________________________________________',
 				x: settings.leftMargin + 104,
 				y: 133,
 				fontSize: 6.3,
@@ -1562,7 +1596,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimentoRealizado(data, 2, 'quantidadeExecutada') ? existsProcedimentoRealizado(data, 2, 'quantidadeExecutada') : createBlock('|___', 3),
 				x: settings.leftMargin + 172.5,
 				y: 133,
 				fontSize: 6.3,
@@ -1572,7 +1606,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 1),
+				txtArray: existsProcedimentoRealizado(data, 2, 'viaAcesso') ? existsProcedimentoRealizado(data, 2, 'viaAcesso') : createBlock('|___', 1),
 				x: settings.leftMargin + 186.5,
 				y: 133,
 				fontSize: 6.3,
@@ -1582,7 +1616,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 1),
+				txtArray: existsProcedimentoRealizado(data, 2, 'tecnicaUtilizada') ? existsProcedimentoRealizado(data, 2, 'tecnicaUtilizada') :  createBlock('|___', 1),
 				x: settings.leftMargin + 193,
 				y: 133,
 				fontSize: 6.3,
@@ -1592,7 +1626,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 2, 'reducaoAcrescimo') ? existsProcedimentoRealizado(data, 2, 'reducaoAcrescimo') : '|___|,|___|___|',
 				x: settings.leftMargin + 203,
 				y: 133,
 				fontSize: 6.3,
@@ -1602,7 +1636,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|___|___|___|___|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 2, 'valorUnitario') ? existsProcedimentoRealizado(data, 2, 'valorUnitario') : '|___|___|___|___|___|___|,|___|___|',
 				x: settings.leftMargin + 222,
 				y: 133,
 				fontSize: 6.3,
@@ -1612,7 +1646,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|___|___|___|___|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 2, 'valorTotal') ? existsProcedimentoRealizado(data, 2, 'valorTotal') : '|___|___|___|___|___|___|,|___|___|',
 				x: settings.leftMargin + 256,
 				y: 133,
 				fontSize: 6.3,
@@ -1623,7 +1657,7 @@ exports.spsadt = function(validData) {
 
 	.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '4 - ' + '|___|___|/|___|___|/|___|___|___|___|',
+				txtArray: '4 - '  + (existsProcedimentoRealizado(data, 3, 'dataExecucao') ? existsProcedimentoRealizado(data, 3, 'dataExecucao') : '|___|___|/|___|___|/|___|___|___|___|'),
 				x: settings.leftMargin + 0.5,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1633,7 +1667,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: settings.intervalBlock,
+				txtArray: buildInterval(data, 3) ,
 				x: settings.leftMargin + 37,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1643,7 +1677,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 2),
+				txtArray: existsProcedimentoRealizado(data, 3, 'procedimento.codigoTabela') ? existsProcedimentoRealizado(data, 3, 'procedimento.codigoTabela') : createBlock('|___', 2),
 				x: settings.leftMargin + 65,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1653,7 +1687,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock(settings.blockDivisor, 10),
+				txtArray: existsProcedimentoRealizado(data, 3, 'procedimento.codigoProcedimento') ? existsProcedimentoRealizado(data, 3, 'procedimento.codigoProcedimento') : createBlock(settings.blockDivisor, 10),
 				x: settings.leftMargin + 75,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1663,7 +1697,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '_____________________________________________________________',
+				txtArray: existsProcedimentoRealizado(data, 3, 'procedimento.descricaoProcedimento') ? existsProcedimentoRealizado(data, 3, 'procedimento.descricaoProcedimento') : '_____________________________________________________________',
 				x: settings.leftMargin + 104,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1673,7 +1707,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimentoRealizado(data, 3, 'quantidadeExecutada') ? existsProcedimentoRealizado(data, 3, 'quantidadeExecutada') : createBlock('|___', 3),
 				x: settings.leftMargin + 172.5,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1683,7 +1717,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 1),
+				txtArray: existsProcedimentoRealizado(data, 3, 'viaAcesso') ? existsProcedimentoRealizado(data, 3, 'viaAcesso') : createBlock('|___', 1),
 				x: settings.leftMargin + 186.5,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1693,7 +1727,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 1),
+				txtArray: existsProcedimentoRealizado(data, 3, 'tecnicaUtilizada') ? existsProcedimentoRealizado(data, 3, 'tecnicaUtilizada') :  createBlock('|___', 1),
 				x: settings.leftMargin + 193,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1703,7 +1737,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 3, 'reducaoAcrescimo') ? existsProcedimentoRealizado(data, 3, 'reducaoAcrescimo') : '|___|,|___|___|',
 				x: settings.leftMargin + 203,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1713,7 +1747,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|___|___|___|___|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 3, 'valorUnitario') ? existsProcedimentoRealizado(data, 3, 'valorUnitario') : '|___|___|___|___|___|___|,|___|___|',
 				x: settings.leftMargin + 222,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1723,7 +1757,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|___|___|___|___|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 3, 'valorTotal') ? existsProcedimentoRealizado(data, 3, 'valorTotal') : '|___|___|___|___|___|___|,|___|___|',
 				x: settings.leftMargin + 256,
 				y: 136.5,
 				fontSize: 6.3,
@@ -1735,7 +1769,7 @@ exports.spsadt = function(validData) {
 
 	.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '5 - ' + '|___|___|/|___|___|/|___|___|___|___|',
+				txtArray: '5 - '+ (existsProcedimentoRealizado(data, 4, 'dataExecucao') ? existsProcedimentoRealizado(data, 4, 'dataExecucao') : '|___|___|/|___|___|/|___|___|___|___|'),
 				x: settings.leftMargin + 0.5,
 				y: 140,
 				fontSize: 6.3,
@@ -1745,7 +1779,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: settings.intervalBlock,
+				txtArray: buildInterval(data,4),
 				x: settings.leftMargin + 37,
 				y: 140,
 				fontSize: 6.3,
@@ -1755,7 +1789,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 2),
+				txtArray: existsProcedimentoRealizado(data, 4, 'procedimento.codigoTabela') ? existsProcedimentoRealizado(data, 4, 'procedimento.codigoTabela') : createBlock('|___', 2),
 				x: settings.leftMargin + 65,
 				y: 140,
 				fontSize: 6.3,
@@ -1765,7 +1799,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock(settings.blockDivisor, 10),
+				txtArray: existsProcedimentoRealizado(data, 4, 'procedimento.codigoProcedimento') ? existsProcedimentoRealizado(data, 4, 'procedimento.codigoProcedimento') : createBlock(settings.blockDivisor, 10),
 				x: settings.leftMargin + 75,
 				y: 140,
 				fontSize: 6.3,
@@ -1775,7 +1809,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '_____________________________________________________________',
+				txtArray: existsProcedimentoRealizado(data, 4, 'procedimento.descricaoProcedimento') ? existsProcedimentoRealizado(data, 4, 'procedimento.descricaoProcedimento') : '_____________________________________________________________',
 				x: settings.leftMargin + 104,
 				y: 140,
 				fontSize: 6.3,
@@ -1785,7 +1819,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 3),
+				txtArray: existsProcedimentoRealizado(data, 4, 'quantidadeExecutada') ? existsProcedimentoRealizado(data, 4, 'quantidadeExecutada') : createBlock('|___', 3),
 				x: settings.leftMargin + 172.5,
 				y: 140,
 				fontSize: 6.3,
@@ -1795,7 +1829,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 1),
+				txtArray: existsProcedimentoRealizado(data, 4, 'viaAcesso') ? existsProcedimentoRealizado(data, 4, 'viaAcesso') : createBlock('|___', 1),
 				x: settings.leftMargin + 186.5,
 				y: 140,
 				fontSize: 6.3,
@@ -1805,7 +1839,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: createBlock('|___', 1),
+				txtArray: existsProcedimentoRealizado(data, 4, 'tecnicaUtilizada') ? existsProcedimentoRealizado(data, 4, 'tecnicaUtilizada') :  createBlock('|___', 1),
 				x: settings.leftMargin + 193,
 				y: 140,
 				fontSize: 6.3,
@@ -1815,7 +1849,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 4, 'reducaoAcrescimo') ? existsProcedimentoRealizado(data, 4, 'reducaoAcrescimo') : '|___|,|___|___|',
 				x: settings.leftMargin + 203,
 				y: 140,
 				fontSize: 6.3,
@@ -1825,7 +1859,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|___|___|___|___|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 4, 'valorUnitario') ? existsProcedimentoRealizado(data, 4, 'valorUnitario') : '|___|___|___|___|___|___|,|___|___|',
 				x: settings.leftMargin + 222,
 				y: 140,
 				fontSize: 6.3,
@@ -1835,7 +1869,7 @@ exports.spsadt = function(validData) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: '|___|___|___|___|___|___|,|___|___|',
+				txtArray: existsProcedimentoRealizado(data, 4, 'valorTotal') ? existsProcedimentoRealizado(data, 4, 'valorTotal') : '|___|___|___|___|___|___|,|___|___|',
 				x: settings.leftMargin + 256,
 				y: 140,
 				fontSize: 6.3,
@@ -1845,6 +1879,7 @@ exports.spsadt = function(validData) {
 		})
 
 	.then(input => {
+		//TODO: IMPLEMENTAR INPUT DE PROFISSIONAIS EXECUTANTES. APENAS RELEVANTE PARA PROCEDIMENTOS COMPLEXOS
 		return actions.formBox(input.doc, {
 			x: settings.leftMargin,
 			y: 143.5,
@@ -2300,6 +2335,7 @@ exports.spsadt = function(validData) {
 			})
 		})
 		.then(input => {
+			// TODO: IMPLEMENTAR INPUT DE PROCEDIMENTOS EM SERIE
 			return actions.text(input.doc, {
 				txtArray: ['56-Data de Realizacao de Procedimentos em Serie'],
 				x: settings.leftMargin + 0.5,
@@ -2525,6 +2561,7 @@ exports.spsadt = function(validData) {
 
 
 	.then(input => {
+			//TODO: IMPLEMENTAR QUEBRA DE LINHA
 			return actions.formBox(input.doc, {
 				x: settings.leftMargin,
 				y: 178.5,
@@ -2536,6 +2573,12 @@ exports.spsadt = function(validData) {
 					fontStyle: settings.headerStyle,
 					fontFamily: settings.headerFont,
 					padding: 0,
+				},
+				content:{
+					text: _.has(data, 'observacao') ? data.observacao : '',
+					fontSize: settings.contentFontSize,
+					fontStyle: settings.contentFontStyle,
+					fontFamily: settings.contentFont,
 				},
 				style: {
 					fill: {
@@ -2560,7 +2603,7 @@ exports.spsadt = function(validData) {
 					padding: 0,
 				},
 				content: {
-					text: createBlock('|__', 8) + ',' + createBlock('|__', 2),
+					text: _.has(data, 'valorTotal.valorProcedimentos') ? data.valorTotal.valorProcedimentos : createBlock('|__', 8) + ',' + createBlock('|__', 2),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -2581,7 +2624,7 @@ exports.spsadt = function(validData) {
 					padding: 0,
 				},
 				content: {
-					text: createBlock('|__', 8) + ',' + createBlock('|__', 2),
+					text: _.has(data, 'valorTotal.valorTaxasAlugueis') ? data.valorTotal.valorTaxasAlugueis : createBlock('|__', 8) + ',' + createBlock('|__', 2),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -2602,7 +2645,7 @@ exports.spsadt = function(validData) {
 					padding: 0,
 				},
 				content: {
-					text: createBlock('|__', 8) + ',' + createBlock('|__', 2),
+					text: _.has(data, 'valorTotal.valorMateriais') ? data.valorTotal.valorMateriais : createBlock('|__', 8) + ',' + createBlock('|__', 2),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -2623,7 +2666,7 @@ exports.spsadt = function(validData) {
 					padding: 0,
 				},
 				content: {
-					text: createBlock('|__', 8) + ',' + createBlock('|__', 2),
+					text: _.has(data, 'valorTotal.valorOPME') ? data.valorTotal.valorOPME : createBlock('|__', 8) + ',' + createBlock('|__', 2),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -2644,7 +2687,7 @@ exports.spsadt = function(validData) {
 					padding: 0,
 				},
 				content: {
-					text: createBlock('|__', 8) + ',' + createBlock('|__', 2),
+					text: _.has(data, 'valorTotal.valorMedicamentos') ? data.valorTotal.valorMedicamentos : createBlock('|__', 8) + ',' + createBlock('|__', 2),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -2665,7 +2708,7 @@ exports.spsadt = function(validData) {
 					padding: 0,
 				},
 				content: {
-					text: createBlock('|__', 8) + ',' + createBlock('|__', 2),
+					text: _.has(data, 'valorTotal.valorGasesMedicinais') ? data.valorTotal.valorGasesMedicinais : createBlock('|__', 8) + ',' + createBlock('|__', 2),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -2686,7 +2729,7 @@ exports.spsadt = function(validData) {
 					padding: 0,
 				},
 				content: {
-					text: createBlock('|__', 8) + ',' + createBlock('|__', 2),
+					text:_.has(data, 'valorTotal.valorTotalGeral') ? data.valorTotal.valorTotalGeral : createBlock('|__', 8) + ',' + createBlock('|__', 2),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
