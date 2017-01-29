@@ -1,11 +1,51 @@
 const jsPdf = require('node-jspdf')
-const actions = require('../jsPdfExtension')
+const _ = require('lodash')
+const moment = require('moment')
+const actions = require('../helper/jsPdfHelper.js')
 
 
 
-exports.spSadt = function(data) {
+function createBlock(divisor, length) {
+	let block = ''
+	for (let i = 1; i <= length; i++) {
+		block = block + divisor
 
-	data = data || {}
+	}
+	block = block + "|"
+	return block
+}
+
+function formatDate(dateString) {
+	const thisDate = moment(dateString, 'YYYY-MM-DD')
+	const day = ("0" + thisDate.date()).slice(-2)
+	const month = ("0" + (thisDate.month() + 1)).slice(-2)
+	const formatDate = day + '/' + month + '/' + thisDate.year()
+	return formatDate
+}
+
+function findDadosSolicitante(contratadoSolicitante) {
+	if (contratadoSolicitante.cpfContratado) return contratadoSolicitante.cpfContratado
+	if (contratadoSolicitante.cnpjContratado) return contratadoSolicitante.cnpjContratado
+	if (contratadoSolicitante.codigoPrestadorNaOperadora) return contratadoSolicitante.codigoPrestadorNaOperadora
+	return undefined
+}
+
+function existsProcedimento(data, index, field) {
+	if (_.has(data, 'procedimentosExecutados') && data.procedimentosExecutados[index] && data.procedimentosExecutados[index].procedimentoExecutado) {
+		if (_.has(data.procedimentosExecutados[index].procedimentoExecutado, field)) {
+			console.log(_.get(data.procedimentosExecutados[index].procedimentoExecutado, field))
+			return _.get(data.procedimentosExecutados[index].procedimentoExecutado, field)
+		} else false
+	} else return false
+}
+
+
+
+exports.spsadt = function(validData) {
+
+
+	const data = _.has(validData, 'guiaSPSADT') ? validData.guiaSPSADT : {}
+
 	let doc = jsPdf('l', 'mm', 'a4')
 	const settings = {
 		headerFontSize: 6,
@@ -20,20 +60,8 @@ exports.spSadt = function(data) {
 		leftMargin: 3
 	}
 
-	function createBlock(divisor, length) {
-		let block = ''
-		for (let i = 1; i <= length; i++) {
-			block = block + divisor
-
-		}
-		block = block + "|"
-		return block
-	}
-
-
-
- return	actions.text(doc, {
-			txtArray: ['TEST  DE SERVICO PROFISSIONAL / SERVICO AUXILIAR DE', 'DIAGNOSTICO E TERAPIA - SP/SADT'],
+	return actions.text(doc, {
+			txtArray: ['GUIA  DE SERVICO PROFISSIONAL / SERVICO AUXILIAR DE', 'DIAGNOSTICO E TERAPIA - SP/SADT'],
 			align: 'center',
 			fontSize: 11,
 			fontFamily: 'times',
@@ -51,7 +79,7 @@ exports.spSadt = function(data) {
 		})
 		.then(input => {
 			return actions.text(input.doc, {
-				txtArray: ['12345678912345678912'],
+				txtArray: _.has(data, 'cabecalhoGuia.numeroGuiaPrestador') ? data.cabecalhoGuia.numeroGuiaPrestador : "",
 				x: 251,
 				y: 4,
 				fontSize: 12,
@@ -70,7 +98,7 @@ exports.spSadt = function(data) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock('|__', 6),
+					text: _.has(data, 'cabecalhoGuia.registroANS') ? data.cabecalhoGuia.registroANS : createBlock('|__', 6),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -90,7 +118,7 @@ exports.spSadt = function(data) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock('|__', 20),
+					text: _.has(data, 'cabecalhoGuia.guiaPrincipal') ? data.cabecalhoGuia.guiaPrincipal : createBlock('|__', 20),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -110,7 +138,7 @@ exports.spSadt = function(data) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: settings.dateBlock,
+					text: _.has(data, 'dadosAutorizacao.dataAutorizacao') ? formatDate(data.dadosAutorizacao.dataAutorizacao) : settings.dateBlock,
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -130,7 +158,7 @@ exports.spSadt = function(data) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock(settings.blockDivisor, 20),
+					text: _.has(data, 'dadosAutorizacao.senha') ? data.dadosAutorizacao.senha : createBlock(settings.blockDivisor, 20),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -150,7 +178,7 @@ exports.spSadt = function(data) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: settings.dateBlock,
+					text: _.has(data, 'dadosAutorizacao.dataValidadeSenha') ? formatDate(data.dadosAutorizacao.dataValidadeSenha) : settings.dateBlock,
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -164,13 +192,13 @@ exports.spSadt = function(data) {
 				h: 7.28,
 				w: 78,
 				header: {
-					text: '7 - Numero da Gua Atribuido pela Operadora',
+					text: '7 - Numero da Guia Atribuido pela Operadora',
 					fontSize: settings.headerFontSize,
 					fontStyle: settings.headerStyle,
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock(settings.blockDivisor, 20),
+					text: _.has(data, 'dadosAutorizacao.numeroGuiaOperadora') ? data.dadosAutorizacao.numeroGuiaOperadora : createBlock(settings.blockDivisor, 20),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -217,7 +245,7 @@ exports.spSadt = function(data) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock(settings.blockDivisor, 20),
+					text: _.has(data, 'dadosBeneficiario.numeroCarteira') ? data.dadosBeneficiario.numeroCarteira : createBlock(settings.blockDivisor, 20),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -237,7 +265,7 @@ exports.spSadt = function(data) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: settings.dateBlock,
+					text: _.has(data, 'dadosBeneficiario.validadeCarteira') ? formatDate(data.dadosBeneficiario.validadeCarteira) : settings.dateBlock,
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -257,7 +285,10 @@ exports.spSadt = function(data) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: "",
+					text: _.has(data, 'dadosBeneficiario.nomeBeneficiario') ? data.dadosBeneficiario.nomeBeneficiario : "",
+					fontSize: settings.contentFontSize,
+					fontStyle: settings.contentFontStyle,
+					fontFamily: settings.contentFont,
 				}
 			})
 		})
@@ -274,7 +305,7 @@ exports.spSadt = function(data) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: createBlock(settings.blockDivisor, 15),
+					text: _.has(data, 'dadosBeneficiario.numeroCNS') ? data.dadosBeneficiario.numeroCNS : createBlock(settings.blockDivisor, 15),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,
@@ -294,7 +325,7 @@ exports.spSadt = function(data) {
 					fontFamily: settings.headerFont,
 				},
 				content: {
-					text: "  	" + createBlock(settings.blockDivisor, 1),
+					text: _.has(data, 'dadosBeneficiario.atendimentoRN') ? "  	" + data.dadosBeneficiario.atendimentoRN : "  	" + createBlock(settings.blockDivisor, 1),
 					fontSize: settings.contentFontSize,
 					fontStyle: settings.contentFontStyle,
 					fontFamily: settings.contentFont,

@@ -4,7 +4,7 @@ const router = express.Router()
 const print = require('../controllers/print.controllers.js')
 
 router
-	.route('/printspsadt')
+	.route('/spsadt')
 	.post(print.controller)
 
 

@@ -1,46 +1,53 @@
 const fs = require('fs')
 const path = require('path')
-const forms = require('../tissForms')
+const validator = require('../validators')
+const builder = require('../builders')
+	//const forms = require('../tissForms')
 
 exports.controller = function(req, res) {
-	forms.spSadt({
-			hello: 'hello'
-		})
-		.then((doc) => {
-			const filePath = path.join(__dirname, '../savedPdfs/', doc.uuid)
+	const dataObject = {
+		body: req.body,
+		url: req.url.slice(1, req.url.length).toLowerCase()
+	}
+
+	validator.validateSchema(dataObject)
+		.then(validData => {
+			if (!builder[dataObject.url]) {
+				Promise.reject(dataObject.url + ' pdf not supported')
+			} else {
+				return builder[dataObject.url](validData)
+			}
+		}).then((doc) => {
+			const filePath = path.join(__dirname, '../builders/savedPdfs/', doc.uuid)
 			console.log('path', filePath)
 
 
-			res.download(filePath, doc.uuid, (err)=>{
-				if(err) console.log(err)
-					else console.log('hooray!')
+			res.download(filePath, doc.uuid, (err) => {
+				if (err) console.log(err)
+				else console.log('hooray!')
 			})
-
-
-		}).catch((e)=>{
+		}).catch((e) => {
 			console.log(e)
+			res.json(e.message ? e.message : e)
 		})
 }
 
 
 
+/*forms.spSadt({
+		hello: 'hello'
+	})
+	.then((doc) => {
+		const filePath = path.join(__dirname, '../savedPdfs/', doc.uuid)
+		console.log('path', filePath)
 
 
+		res.download(filePath, doc.uuid, (err)=>{
+			if(err) console.log(err)
+				else console.log('hooray!')
+		})
 
 
-
-
-			//res.sendFile(path.join(__dirname, '../savedPdfs/', doc.uuid))
-			//fs.readFile(path.join(__dirname, '../savedPdfs/', doc.uuid), function(err, data) {})
-				//console.log('doc',doc)
-
-			//res.download(path.join(__dirname, '../savedPdfs/', doc.uuid))
-
-/*			const base64String = buf.toString('base64')
-*/		/*	const file = fs.createReadStream(filePath, { encoding: 'base64' });
-			const stat = fs.statSync(path.join(__dirname, '../savedPdfs/', doc.uuid));
-			res.setHeader('Content-Length', stat.size);
-			res.setHeader('Content-Type', 'application/pdf');
-			res.setHeader('Content-Disposition', 'attachment; filename='+doc.uuid);
-			file.pipe(res)*/
-			//request(req.url).pipe(res)
+	}).catch((e)=>{
+		console.log(e)
+	})*/
