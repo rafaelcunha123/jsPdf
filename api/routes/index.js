@@ -7,5 +7,9 @@ router
 	.route('/spsadt')
 	.post(print.controller)
 
+	router
+	.route('/consulta')
+	.post(print.controller)
+
 
 module.exports = router

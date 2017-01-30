@@ -20,7 +20,11 @@ function text(doc, options) {
 function normalizeTextInput(input) {
 
 	input.options = input.options || {}
-	if (input.options.txtArray) input.options.txtArray = Array.isArray(input.options.txtArray) ? input.options.txtArray : [input.options.txtArray]
+	if (input.options.txtArray) {
+		input.options.txtArray = Array.isArray(input.options.txtArray) ? input.options.txtArray : [input.options.txtArray]
+	} else {
+		input.options.txtArray = [""]
+	}
 	input.options.x = input.options.x || 0
 	input.options.y = input.options.y || 0
 	input.options.lineSpacing = input.options.lineSpacing || 0.2
@@ -162,7 +166,14 @@ function formatContent(input) {
 		input.options.content.textHeigth = input.options.content.fontSize * 0.328
 		input.options.content.fontFamily = input.options.content.fontFamily || 'times'
 		input.options.content.fontStyle = input.options.content.fontStyle || 'normal'
+		input.options.content.align = input.options.content.align || 'left'
 		input.options.content.padding = input.options.content.padding || 0.8
+		if (input.options.content.align === 'center') {
+			input.options.content.textWidth = (input.doc.getStringUnitWidth(input.options.content.text) * input.options.content.fontSize / input.doc.internal.scaleFactor)
+			input.options.content.xPadding = ((input.options.w - input.options.content.textWidth) / 2)
+		}
+		input.options.content.xPadding = input.options.content.xPadding || 0
+
 
 		input.doc.setFontSize(input.options.content.fontSize)
 		input.doc.setFont(input.options.content.fontFamily, input.options.content.fontStyle)
@@ -189,7 +200,7 @@ function printHeader(input) {
 
 function printContent(input) {
 	if (input.options.content && input.options.content.text) {
-		input.doc.text(input.options.x + input.options.content.padding, input.options.y + input.options.h - input.options.content.padding, input.options.content.text)
+		input.doc.text(input.options.x + input.options.content.padding + input.options.content.xPadding, input.options.y + input.options.h - input.options.content.padding, input.options.content.text)
 		return Promise.resolve(input)
 	} else return Promise.resolve(input)
 }
@@ -199,6 +210,7 @@ function printContent(input) {
 
 function saveDoc(input) {
 	const key = uuidV1() + '.pdf'
+//const key = 'test.pdf'
 	console.log(path.join(__dirname, '../savedPdfs/', key))
 	input.uuid = key
 
@@ -206,7 +218,7 @@ function saveDoc(input) {
 		input.doc.save(path.join(__dirname, '../savedPdfs/', key), (err) => {
 			if (err) reject(err)
 			console.log('saved')
-			resolve(input)
+			resolve(input)			
 		})
 	})
 }

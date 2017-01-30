@@ -18,9 +18,10 @@ exports.controller = function(req, res) {
 				return builder[dataObject.url](validData)
 			}
 		}).then((doc) => {
+			//res.send('OK')
+
 			const filePath = path.join(__dirname, '../builders/savedPdfs/', doc.uuid)
 			console.log('path', filePath)
-
 
 			res.download(filePath, doc.uuid, (err) => {
 				if (err) console.log(err)
@@ -31,23 +32,3 @@ exports.controller = function(req, res) {
 			res.json(e.message ? e.message : e)
 		})
 }
-
-
-
-/*forms.spSadt({
-		hello: 'hello'
-	})
-	.then((doc) => {
-		const filePath = path.join(__dirname, '../savedPdfs/', doc.uuid)
-		console.log('path', filePath)
-
-
-		res.download(filePath, doc.uuid, (err)=>{
-			if(err) console.log(err)
-				else console.log('hooray!')
-		})
-
-
-	}).catch((e)=>{
-		console.log(e)
-	})*/
